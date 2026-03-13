@@ -1,0 +1,10 @@
+#for i in range(1, 17):
+        #   self.mhe_arrival_weights[f"x[{i}]"] = 4/((.999*(i/42))**2)
+        #for i in range(17, 43):
+        #   self.mhe_arrival_weights[f"x[{i}]"] = 4/((.36+((.98-.36)/(42-21-1))*(i-21-1))**2)
+        #for i in range(2, 22):
+        #    self.mhe_arrival_weights[f"M[{i}]"] = 4/((3340+((3772-3340)/(21-2))*(i-2))**2)
+        #for i in range(22, 43):
+        #    self.mhe_arrival_weights[f"M[{i}]"] = 4/((2890+((4650-2890)/(42-21-1))*(i-21-1))**2)
+        #for i in range(1, 2):
+        #    self.mhe_arrival_weights[f"M[{i}]"] = 4/(2*105500)
