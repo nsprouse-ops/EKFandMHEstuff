@@ -64,11 +64,11 @@ class Options:
         #                meaningful Kalman gain. Rule of thumb: Q_w >= R * expected_change^2
         # ekf_R        : temperature measurement noise variance [K^2]
         self.ekf_Q_process          = 1e-3   # process noise covariance (Ca, Cb, Cc, Cm, T)
-        self.ekf_Q_disturbance      = 1e-2   # d_k is a CONSTANT model mismatch — tiny Q means
+        self.ekf_Q_disturbance      = 2.5e-4   # d_k is a CONSTANT model mismatch — tiny Q means
                                              # filter holds its estimate once converged
-        self.ekf_R                  = 5      # measurement noise covariance (T) [K^2]
+        self.ekf_R                  = 9      # measurement noise covariance (T) [K^2]
         self.ekf_P0_scale           = 1e-4   # initial error covariance for process states
-        self.ekf_P0_scale_disturbance = 50  # initial error covariance for d_k — must be LARGE
+        self.ekf_P0_scale_disturbance = 1.0  # initial error covariance for d_k — must be LARGE
                                              # because d_k starts at 1.0 but true ~0.34 (error ~0.66)
 
         # Display/Data Output options

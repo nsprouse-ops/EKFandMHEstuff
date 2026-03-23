@@ -17,6 +17,7 @@ def variables_initialize(m):
     m.Measured_display_names = ["T\;(K)"]
     m.Unmeasured_index = pyo.Set(initialize=["Ca","Cb","Cm","Cc"])
     m.Unmeasured_display_names = ["C_a\;(mol/L)", "C_b\;(mol/L)","C_m\;(mol/L)","C_c\;(mol/L)"]
+    m.Disturbance_index = pyo.Set(initialize=["d_k"])
     m.DV_index = pyo.Set(initialize=["Fb0", "UA"])   # Disturbance variables
 
     # ---- Differential State Variables ----
@@ -31,7 +32,7 @@ def variables_initialize(m):
     m.UA = pyo.Param(initialize=7262,   mutable=False)
     
     # ---- disturbance state
-    m.d_k = pyo.Var(m.time, initialize=1, bounds=(.0001,100))  # Heat transfer coefficient * area
+    m.d_k = pyo.Var(m.time, initialize=0, bounds=(-4.9,4.9))  # Heat transfer coefficient * area
 
     # ---- Manipulated Inputs ----
     m.Fa0 = pyo.Var(m.time, initialize=35, bounds=(10,100))    # A feed rate
@@ -77,8 +78,8 @@ def equations_write(m):
     Fm0 = 45.4      # Feed rate of inert/miscellaneous stream [mol/min]
 
     # ---- Algebraic Equations ----
-    m.k = {t: 5e13 * exp(-18012 / 1.987 / (m.T[t])) for t in m.time}
-    m.k_eff = {t: m.k[t] * m.d_k[t] for t in m.time}
+    m.k = {t: (5e13 + 1e13*m.d_k[t]) * exp(-18012 / 1.987 / (m.T[t])) for t in m.time}
+    m.k_eff = {t: m.k[t] for t in m.time}
     m.ra = {t: 0 - (m.k_eff[t] * m.Ca[t]) for t in m.time}
     m.rb = {t: 0 - (m.k_eff[t] * m.Ca[t]) for t in m.time}
     m.rc = {t: m.k_eff[t] * m.Ca[t] for t in m.time}

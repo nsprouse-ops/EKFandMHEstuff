@@ -28,10 +28,11 @@ class Options:
 
     def __init__(self):
         # Simulation control
-        self.num_horizons = 200
+        self.MHE_window = 7
+        self.num_horizons = 25
         self.nfe_finite = 2
         self.ncp_finite = 3
-        self.sampling_time = 0.05
+        self.sampling_time = 10
 
         # Infinite horizon settings
         self.infinite_horizon = True
@@ -50,29 +51,43 @@ class Options:
 
         self.input_suppression = True
         self.input_suppression_factor = 0.5e0 * 1.0E5
-        self.measurement_noise_amplitude = 0.01
-        self.measurement_noise_seed = 1
         #list(m.CV_index) + list(m.MV_index) is order
-        self.stage_cost_weights = [1, 1e-2, 1e-2, 1e-3]
+        self.stage_cost_weights = [5e1 * 1.0e4, 1e3 * 1.0, 0e-1 * 1.0e5, 0e-1 * 1.0e5]
         self.gamma = 0.05
         self.beta = 1.2
+        # MHE arrival cost weights
+        self.mhe_arrival_default_lambda = 0.0025
+        #self.mhe_arrival_weights = {}
+        #for i in range(1, 17):
+        #   self.mhe_arrival_weights[f"x[{i}]"] = 4/((.999*(i/42))**2)
+        #for i in range(17, 43):
+        #   self.mhe_arrival_weights[f"x[{i}]"] = 4/((.36+((.98-.36)/(42-21-1))*(i-21-1))**2)
+        #for i in range(2, 22):
+        #    self.mhe_arrival_weights[f"M[{i}]"] = 4/((3340+((3772-3340)/(21-2))*(i-2))**2)
+        #for i in range(22, 43):
+        #    self.mhe_arrival_weights[f"M[{i}]"] = 4/((2890+((4650-2890)/(42-21-1))*(i-21-1))**2)
+        #for i in range(1, 2):
+        #    self.mhe_arrival_weights[f"M[{i}]"] = 4/(2*105500)
+        self.mhe_state_error_default = 1e-3 #x
+        self.mhe_state_error = {}
+        for i in range(1, 43):
+           self.mhe_state_error[f"x[{i}]"] = .002
+        for i in range(2, 43):
+            self.mhe_state_error[f"M[{i}]"] = 1
+        for i in range(1, 2):
+            self.mhe_state_error[f"M[{i}]"] = 5
+        self.mhe_output_error_default = 1e-3 #y
+        self.mhe_output_error = {}
+        for i in range(1, 43):
+            self.mhe_output_error[f"T[{i}]"] = 352.92248738561443*0.01
+        self.mhe_min_window = 3
+        # Display/Data Output options   
 
-        # EKF options
-        # Q_process    : variance allowed on process state evolution per step
-        # Q_disturbance: variance allowed on d_UA, d_k per step
-        #                d_UA/d_k are dimensionless (order 1); needs to be >> R to get
-        #                meaningful Kalman gain. Rule of thumb: Q_w >= R * expected_change^2
-        # ekf_R        : temperature measurement noise variance [K^2]
-        self.ekf_Q_process          = 1e-3   # process noise covariance (Ca, Cb, Cc, Cm, T)
-        self.ekf_Q_disturbance      = 2.5e-4   # d_k is a CONSTANT model mismatch — tiny Q means
-                                             # filter holds its estimate once converged
-        self.ekf_R                  = 9      # measurement noise covariance (T) [K^2]
-        self.ekf_P0_scale           = 1e-4   # initial error covariance for process states
-        self.ekf_P0_scale_disturbance = 1.0  # initial error covariance for d_k — must be LARGE
-                                             # because d_k starts at 1.0 but true ~0.34 (error ~0.66)
+
+
 
         # Display/Data Output options
-        self.live_plot = True
+        self.live_plot = False
         self.plot_end = False
         self.save_data = True
         self.save_figure = True
@@ -93,3 +108,4 @@ def _import_settings():
         An instance of the Options class with initialized values.
     """
     return Options()
+

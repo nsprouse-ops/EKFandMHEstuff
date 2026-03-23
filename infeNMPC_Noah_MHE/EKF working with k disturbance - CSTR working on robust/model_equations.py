@@ -17,6 +17,7 @@ def variables_initialize(m):
     m.Measured_display_names = ["T\;(K)"]
     m.Unmeasured_index = pyo.Set(initialize=["Ca","Cb","Cm","Cc"])
     m.Unmeasured_display_names = ["C_a\;(mol/L)", "C_b\;(mol/L)","C_m\;(mol/L)","C_c\;(mol/L)"]
+    m.Disturbance_index = pyo.Set(initialize=["d_k"])
     m.DV_index = pyo.Set(initialize=["Fb0", "UA"])   # Disturbance variables
 
     # ---- Differential State Variables ----
@@ -26,9 +27,12 @@ def variables_initialize(m):
     m.Cm = pyo.Var(m.time, initialize=1.5, domain=pyo.NonNegativeReals)  # Inert/misc concentration
     m.T = pyo.Var(m.time, initialize=297, domain=pyo.NonNegativeReals)   # Reactor temperature
 
-    # ---- Parameters (Disturbances) ----
+    # ---- Parameters (Disturbances) — mutable so EKF estimates can be fed back ----
     m.Fb0 = pyo.Param(initialize=453.6, mutable=False)  # B feed rate
-    m.UA = pyo.Param(initialize=7262, mutable=False)    # Heat transfer coefficient * area
+    m.UA = pyo.Param(initialize=7262,   mutable=False)
+    
+    # ---- disturbance state
+    m.d_k = pyo.Var(m.time, initialize=1, bounds=(.0001,1000))  # Heat transfer coefficient * area
 
     # ---- Manipulated Inputs ----
     m.Fa0 = pyo.Var(m.time, initialize=35, bounds=(10,100))    # A feed rate
@@ -74,10 +78,11 @@ def equations_write(m):
     Fm0 = 45.4      # Feed rate of inert/miscellaneous stream [mol/min]
 
     # ---- Algebraic Equations ----
-    m.k = {t: 1.696e13 * exp(-18012 / 1.987 / (m.T[t])) for t in m.time}
-    m.ra = {t: 0 - (m.k[t] * m.Ca[t]) for t in m.time}
-    m.rb = {t: 0 - (m.k[t] * m.Ca[t]) for t in m.time}
-    m.rc = {t: m.k[t] * m.Ca[t] for t in m.time}
+    m.k = {t: 5e13* exp(-18012 / 1.987 / (m.T[t])) for t in m.time}
+    m.k_eff = {t: m.k[t]*m.d_k[t] for t in m.time}
+    m.ra = {t: 0 - (m.k_eff[t] * m.Ca[t]) for t in m.time}
+    m.rb = {t: 0 - (m.k_eff[t] * m.Ca[t]) for t in m.time}
+    m.rc = {t: m.k_eff[t] * m.Ca[t] for t in m.time}
     m.Na = {t: m.Ca[t] * V for t in m.time}
     m.Nb = {t: m.Cb[t] * V for t in m.time}
     m.Nc = {t: m.Cc[t] * V for t in m.time}
